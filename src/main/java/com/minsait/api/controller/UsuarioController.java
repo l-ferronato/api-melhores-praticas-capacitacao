@@ -77,15 +77,18 @@ public class UsuarioController {
     @PutMapping("/usuario")
     public ResponseEntity<UsuarioResponse> update(@RequestBody UsuarioRequest request){
 
-        if(request.getSenha() != null){
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            request.setSenha(encoder.encode(request.getSenha()));
-        }
-
         final var usuarioEntity = ObjectMapperUtil.map(request, UsuarioEntity.class);
         final var usuarioEntityFound = usuarioRepository.findById(usuarioEntity.getId());
         if(usuarioEntityFound.isEmpty()){
             return new ResponseEntity<>(new UsuarioResponse(), HttpStatus.NOT_FOUND);
+        }
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        if(request.getSenha() != null){
+            usuarioEntity.setSenha(encoder.encode(request.getSenha()));
+        } else {
+            usuarioEntity.setSenha(encoder.encode(usuarioEntityFound.get().getSenha()));
         }
 
         final var usuarioUpdated = usuarioRepository.save(usuarioEntity);
