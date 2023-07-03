@@ -35,7 +35,7 @@ public class AuthController {
 
         UsuarioEntity usuarioEncontrado = usuarioRepository.findByLogin(request.getUserName());
 
-        if(encoder.matches(request.getPassword(), usuarioEncontrado.getSenha())){
+        if(usuarioEncontrado != null && encoder.matches(request.getPassword(), usuarioEncontrado.getSenha())){
             final ArrayList<String> permissions = new ArrayList<>();
             permissions.add("LEITURA_CLIENTE");
             permissions.add("LEITURA_USUARIO");
