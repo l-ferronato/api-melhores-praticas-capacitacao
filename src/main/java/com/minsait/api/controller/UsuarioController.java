@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,21 @@ public class UsuarioController {
         final Page<UsuarioEntity> usuarioEntityListPage = usuarioRepository.findAll(usuarioEntity.usuarioEntitySpecification(), pageable);
         final  Page<UsuarioResponse> usuarioResponseList = ObjectMapperUtil.mapAll(usuarioEntityListPage, UsuarioResponse.class);
         return ResponseEntity.ok(usuarioResponseList);
+    }
+
+    @PreAuthorize("hasAuthority('LEITURA_USUARIO')")
+    @GetMapping("/usuario/{id}")
+    public ResponseEntity<UsuarioResponse> findById(@PathVariable Long id){
+        final var usuarioEntity = usuarioRepository.findById(id);
+        UsuarioResponse usuarioResponse = new UsuarioResponse();
+
+        if (usuarioEntity.isPresent()){
+            usuarioResponse = ObjectMapperUtil.map(usuarioEntity.get(), UsuarioResponse.class);
+        }else{
+            return new ResponseEntity<>(usuarioResponse, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(usuarioResponse, HttpStatus.OK);
     }
 
 }
