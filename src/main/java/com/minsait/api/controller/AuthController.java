@@ -39,7 +39,9 @@ public class AuthController {
         if(encoder.matches(request.getPassword(), usuarioEncontrado.getSenha())){
             final ArrayList<String> permissions = new ArrayList<>();
             permissions.add("LEITURA_CLIENTE");
+            permissions.add("LEITURA_USUARIO");
             permissions.add("ESCRITA_CLIENTE");
+            permissions.add("ESCRITA_USUARIO");
 
             final var token =jwtUtil.generateToken("admin", permissions, 5);
             return new ResponseEntity<>(GetTokenResponse.builder()

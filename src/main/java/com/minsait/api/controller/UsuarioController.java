@@ -1,5 +1,6 @@
 package com.minsait.api.controller;
 
+import com.minsait.api.controller.dto.UsuarioRequest;
 import com.minsait.api.controller.dto.UsuarioResponse;
 import com.minsait.api.repository.UsuarioEntity;
 import com.minsait.api.repository.UsuarioRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -52,6 +54,20 @@ public class UsuarioController {
         }
 
         return new ResponseEntity<>(usuarioResponse, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ESCRITA_USUARIO')")
+    @PostMapping("/usuario")
+    public ResponseEntity<UsuarioResponse> insert(@RequestBody UsuarioRequest request){
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        request.setSenha(encoder.encode(request.getSenha()));
+
+        final var usuarioEntity = ObjectMapperUtil.map(request, UsuarioEntity.class);
+        final var usuarioInserted = usuarioRepository.save(usuarioEntity);
+        final var usuarioResponse = ObjectMapperUtil.map(usuarioInserted, UsuarioResponse.class);
+
+        return new ResponseEntity<>(usuarioResponse, HttpStatus.CREATED);
     }
 
 }
