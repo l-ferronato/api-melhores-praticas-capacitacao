@@ -1,5 +1,6 @@
 package com.minsait.api.controller;
 
+import com.minsait.api.controller.dto.MessageResponse;
 import com.minsait.api.controller.dto.UsuarioRequest;
 import com.minsait.api.controller.dto.UsuarioResponse;
 import com.minsait.api.repository.UsuarioEntity;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -89,6 +92,27 @@ public class UsuarioController {
         final var usuarioResponse = ObjectMapperUtil.map(usuarioUpdated, UsuarioResponse.class);
 
         return new ResponseEntity<>(usuarioResponse, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ESCRITA_USUARIO')")
+    @DeleteMapping("/usuario/{id}")
+    public ResponseEntity<MessageResponse> delete(@PathVariable Long id){
+        final var usuarioEntityFound = usuarioRepository.findById(id);
+        if(usuarioEntityFound.isPresent()){
+            usuarioRepository.delete(usuarioEntityFound.get());
+        }else{
+            return new ResponseEntity<>(MessageResponse.builder()
+                    .message("Usuário não encontrado!")
+                    .date(LocalDateTime.now())
+                    .error(false)
+                    .build(), HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(MessageResponse.builder()
+                .message("OK")
+                .date(LocalDateTime.now())
+                .error(false)
+                .build(), HttpStatus.OK);
     }
 
 }
